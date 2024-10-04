@@ -6,6 +6,7 @@ import userState from "../atom/userAtom";
 import { app } from "../../firebase";
 import { useRouter } from "next/navigation";
 import userAvatar from "../atom/userAvatar";
+import Avatar from "./Avatar";
 
 export default function SignOut() {
   const [currentUser, setCurrentUser] = useRecoilState(userState);
@@ -29,9 +30,16 @@ export default function SignOut() {
     }
   }
 
+  console.log(userAvatarFile);
+
   return (
-    <div>
-      <button onClick={onSignOut}>Log-out</button>
-    </div>
+    <>
+      {userAvatarFile && (
+        <div className="flex items-center space-x-4 p-5" onClick={onSignOut}>
+          <Avatar user={userAvatarFile} />
+          <h1 className="text-pretty">{userAvatarFile.displayName}</h1>
+        </div>
+      )}
+    </>
   );
 }

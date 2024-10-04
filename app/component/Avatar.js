@@ -10,10 +10,10 @@ export default function Avatar({ user }) {
     return name[0].toUpperCase();
   };
 
-  if (user.photoURL) {
+  if (user.photo) {
     return (
       <img
-        src={user.photoURL}
+        src={user.photo}
         alt="User Avatar"
         className="rounded-full w-12 h-12"
       />
