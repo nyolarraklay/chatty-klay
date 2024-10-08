@@ -9,13 +9,14 @@ import { useRecoilState } from "recoil";
 import { app, db } from "../../firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { streamReader } from "openai-edge-stream";
-import { useChat } from "ai/react";
+import { v4 as uuid } from "uuid";
+import Message from "../component/Message";
 
 export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
-    api: "/api/sendMessage",
-  });
+  const [messageText, setMessageText] = useState("");
   const [userAvatarFile, setUserAvatarFile] = useRecoilState(userAvatar);
+  const [newChatMessage, setNewChatMessage] = useState([]);
+  const [incomingMessages, setIncomingMessages] = useState([]);
   const auth = getAuth(app);
 
   useEffect(() => {
@@ -36,24 +37,37 @@ export default function Chat() {
     });
   }, [db]);
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   console.log("message text", messageText);
-  //   const response = await fetch("/api/sendMessage", {
-  //     method: "POST",
-  //     body: JSON.stringify({ message: messageText }),
-  //   });
-  //   const data = response.body;
-  //   if (!data) {
-  //     return;
-  //   }
-  //   const reader = data.getReader();
-  //   await streamReader(reader, (message) => {
-  //     console.log("message", message);
-  //   });
-  // };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setNewChatMessage((prev) => {
+      const newChatMessage = [
+        ...prev,
+        {
+          _id: uuid(),
+          role: "user",
+          content: messageText,
+        },
+      ];
 
-  console.log("messages", messages);
+      return newChatMessage;
+    });
+    const response = await fetch("/api/sendMessage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message: messageText }),
+    });
+    const data = response.body;
+
+    if (!data) {
+      return;
+    }
+    const reader = data.getReader();
+    await streamReader(reader, (message) => {
+      setIncomingMessages((prevMessages) => [...prevMessages, message.content]);
+    });
+  };
 
   return (
     <>
@@ -65,16 +79,26 @@ export default function Chat() {
       <div className="grid h-screen grid-cols-[260px_1fr]">
         <ChatSidebar />
         <div className="bg-gray-700 flex flex-col flex-1">
-          <div className=" flex-1">Chat</div>
-
+          <div className="flex-1">
+            {newChatMessage.map((message) => (
+              <Message
+                key={message._id}
+                role={message.role}
+                content={message.content}
+              />
+            ))}
+            {!!incomingMessages && (
+              <Message role="assistant" content={incomingMessages} />
+            )}
+          </div>
           <footer className="bg-gray-800 p-10">
             <form onSubmit={handleSubmit}>
               <fieldset className="flex gap-2">
                 <textarea
                   className="w-full resize-none rounded-md bg-gray-700 p-2 focus:border-emerald-500 focus:bg-gray-600 focus:outline-emerald-500 text-white"
                   placeholder="send message ..."
-                  onChange={handleInputChange}
-                  value={input}
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
                 />
                 <button
                   type="submit"
