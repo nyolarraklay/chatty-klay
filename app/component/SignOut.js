@@ -30,8 +30,6 @@ export default function SignOut() {
     }
   }
 
-  console.log(userAvatarFile);
-
   return (
     <>
       {userAvatarFile && (
