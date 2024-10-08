@@ -9,9 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.6.0",
+    "@fortawesome/free-brands-svg-icons": "^6.6.0",
+    "@fortawesome/free-regular-svg-icons": "^6.6.0",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "ai": "^3.4.9",
+    "crypto-js": "^4.2.0",
     "firebase": "^10.13.2",
     "firebaseui": "^6.1.0",
     "next": "14.2.13",
+    "openai": "^4.67.1",
     "openai-edge-stream": "^2.0.1",
     "prettier": "^3.3.3",
     "react": "^18",
